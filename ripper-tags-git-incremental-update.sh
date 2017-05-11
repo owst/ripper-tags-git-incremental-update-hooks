@@ -2,16 +2,18 @@
 
 set -euo pipefail
 
-changed_files_file=$(mktemp 'changed_files.txt')
-trap "rm -f $changed_files_file" EXIT
+tmpdir=$(mktemp -d)
+trap "rm -rf $tmpdir" EXIT
+
+changed_files_file="$tmpdir/changed_files.txt"
 
 git diff --name-only $1 $2 | grep '\.rb$' > $changed_files_file
 
-change_count=$(wc -l $changed_files_file)
+change_count=$(wc -l "$changed_files_file" | cut -d ' ' -f1)
 
-if [ $change_count -gt 0 ]; then
+if (( $change_count > 0 )); then
     echo "Updating tags using ripper-tags between $1 and $2" \
-        "($change_count .rb files)"
+        "($change_count files)"
 
     # Based on https://goo.gl/JFHEGX
     {
