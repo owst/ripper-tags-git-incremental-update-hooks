@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+"$(dirname "$(readlink -f "$0")")/ripper-tags-git-incremental-update.sh" HEAD~1 HEAD
