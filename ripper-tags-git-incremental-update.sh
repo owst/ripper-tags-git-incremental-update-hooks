@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -exuo pipefail
+set -euo pipefail
 
 changed_files_file=$(mktemp 'changed_files.txt')
 trap "rm -f $changed_files_file" EXIT
