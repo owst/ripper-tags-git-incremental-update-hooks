@@ -25,7 +25,9 @@ if (( $change_count > 0 )); then
             cat tags | grep -v -f "$changed_files_file"
             # Remove the tags header of the new_tags file
             cat new_tags | grep -v '^!_'
-        } | sort > merged_tags
+        # Sort with a modified locale, to ensure we don't mix
+        # upper-and-lowercase letters.
+        } | LC_COLLATE=C sort > merged_tags
 
         mv {merged,new}_tags
     fi
