@@ -11,26 +11,27 @@ changed_files_file="$tmpdir/changed_files.txt"
 git diff --name-only --diff-filter=d $1 $2 '*.rb' > "$changed_files_file"
 change_count=$(wc -l "$changed_files_file" | cut -d ' ' -f1)
 
-if (( $change_count > 0 )); then
-    echo "Updating tags using ripper-tags between $1 and $2" \
-        "($change_count files)"
+if (( $change_count <= 0 )); then
+    exit 0;
+fi
 
-    xargs --arg-file "$changed_files_file" ripper-tags --tag-file new_tags
+echo "Updating tags using ripper-tags between $1 and $2 ($change_count files)"
 
-    # If a non-empty tags file exists, we need to merge the old and new tags.
-    if [ -s tags ]; then
-        # Based on https://goo.gl/JFHEGX
-        {
-            # Remove the old tags for the updated files
-            cat tags | grep -v -f "$changed_files_file"
-            # Remove the tags header of the new_tags file
-            cat new_tags | grep -v '^!_'
+xargs --arg-file "$changed_files_file" ripper-tags --tag-file "$tmpdir/new_tags"
+
+# If a non-empty tags file exists, we need to merge the old and new tags.
+if [ -s tags ]; then
+    # Based on https://goo.gl/JFHEGX
+    {
+        # Remove the old tags for the updated files
+        cat tags | grep -v -f "$changed_files_file"
+        # Remove the tags header of the new_tags file
+        cat "$tmpdir/new_tags" | grep -v '^!_TAG_FILE_'
         # Sort with a modified locale, to ensure we don't mix
         # upper-and-lowercase letters.
-        } | LC_COLLATE=C sort > merged_tags
+    } | LC_COLLATE=C sort > "$tmpdir/merged_tags"
 
-        mv {merged,new}_tags
-    fi
-
-    mv {new_,}tags
+    mv $tmpdir/{merged,new}_tags
 fi
+
+mv {"$tmpdir/new_",}tags
