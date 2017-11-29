@@ -25,8 +25,9 @@ if [ -s tags ]; then
     {
         # Remove the old tags for the updated files
         cat tags | grep -v -f "$changed_files_file"
-        # Remove the tags header of the new_tags file
-        cat "$tmpdir/new_tags" | grep -v '^!_TAG_FILE_'
+        # Remove the tags header of the new_tags file (and gracefully handle
+        # grep failing if there aren't any non-header rows)
+        cat "$tmpdir/new_tags" | { grep -v '^!_TAG_FILE_' || true; }
         # Sort with a modified locale, to ensure we don't mix
         # upper-and-lowercase letters.
     } | LC_COLLATE=C sort > "$tmpdir/merged_tags"
