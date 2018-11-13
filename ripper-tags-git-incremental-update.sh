@@ -30,7 +30,7 @@ if [ -s tags ]; then
         cat "$tmpdir/new_tags" | { grep -v '^!_TAG_FILE_' || true; }
         # Sort with a modified locale, to ensure we don't mix
         # upper-and-lowercase letters.
-    } | LC_COLLATE=C sort > "$tmpdir/merged_tags"
+    } | LC_ALL=C sort > "$tmpdir/merged_tags"
 
     mv $tmpdir/{merged,new}_tags
 fi
